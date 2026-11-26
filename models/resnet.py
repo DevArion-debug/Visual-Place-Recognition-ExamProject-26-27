@@ -41,12 +41,21 @@ class ResNetDescriptor(torch.nn.Module):
         features = self.extract_features(images)
         descriptors = self.pool_features(features)
         return F.normalize(descriptors.flatten(1), p=2, dim=1)
-
+    
     def extract_features(self, images):
-        """Return the required spatial feature map from the ResNet backbone."""
-        raise NotImplementedError(
-            "Implement the required ResNet truncation and return its feature map."
-        )
+        """Extract spatial features from ResNet."""
+
+        x = self.backbone.conv1(images)
+        x = self.backbone.bn1(x)
+        x = self.backbone.relu(x)
+        x = self.backbone.maxpool(x)
+
+        x = self.backbone.layer1(x)
+        x = self.backbone.layer2(x)
+        x = self.backbone.layer3(x)
+
+        return x
+
 
     def pool_features(self, features):
         """Aggregate a spatial feature map into one vector per image."""
